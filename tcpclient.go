@@ -201,6 +201,13 @@ func (mb *tcpTransporter) tcpConnect() error {
 		dialer := net.Dialer{Timeout: mb.Timeout}
 		conn, err := dialer.Dial("tcp", mb.Address)
 		if err != nil {
+			if conn != nil {
+				fmt.Println("s7 forced 1 to close the connection." + err.Error())
+				err := conn.Close()
+				if err != nil {
+					return err
+				}
+			}
 			return err
 		}
 		mb.conn = conn
@@ -216,6 +223,13 @@ func (mb *tcpTransporter) connect() error {
 	//second stage: ISOTCP (ISO 8073) Connection
 	err = mb.isoConnect()
 	if err != nil {
+		if mb.conn != nil {
+			fmt.Println("s7 forced 5 to close the connection." + err.Error())
+			err := mb.conn.Close()
+			if err != nil {
+				return err
+			}
+		}
 		return err
 	}
 	// Third stage : S7 protocol data unit negotiation
